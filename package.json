@@ -1,10 +1,11 @@
 {
   "name": "pink-launcher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A clean pink home screen for Samsung TVs with only the apps you use.",
   "packageType": "app",
   "appName": "Pink Home",
   "appPath": "index.html",
   "keys": [],
-  "license": "MIT"
+  "license": "MIT",
+  "serviceFile": "service.js"
 }

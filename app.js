@@ -3,7 +3,7 @@
   'use strict';
 
   // The six apps. `match` finds the installed app by name; `ids` are known Samsung app IDs used as a fallback.
-  // `cut` is the brightness level (0-1) above which a part of the real icon is drawn in pink; darker parts turn black.
+  // `cut` is the brightness level (0-1) above which a part of the real icon is kept as logo; darker parts are dropped.
   var APPS = [
     { label: 'Netflix',     mono: 'N',     cut: 0.06, match: /netflix/i,                                  ids: ['3201907018807', '11101200001'] },
     { label: 'YouTube',     mono: 'YT',    cut: 0.55, match: /^youtube$|youtube(?!.*(kids|music|tv))/i,   ids: ['111299001912'] },
@@ -44,7 +44,6 @@
   }
   makeFilters();
 
-  var hasTizen = typeof window.tizen !== 'undefined' && tizen.application;
   var dock = document.getElementById('dock');
   var pill = document.getElementById('pill');
   var focus = 0;
@@ -131,43 +130,69 @@
     pill.textContent = APPS[i].label;
   }
 
-  // Use the TV's own icons once we know which apps are installed.
-  function resolveInstalled() {
-    if (!hasTizen) return;
-    try {
-      tizen.application.getAppsInfo(function (list) {
-        for (var i = 0; i < APPS.length; i++) {
-          var a = APPS[i];
-          for (var j = 0; j < list.length; j++) {
-            if (a.match.test(list[j].name || '')) { a.found = list[j]; break; }
-          }
-          if (!a.found) {
-            for (var j2 = 0; j2 < list.length; j2++) {
-              if (a.ids.indexOf(list[j2].id) !== -1 || a.ids.indexOf(String(list[j2].id).split('.')[0]) !== -1) { a.found = list[j2]; break; }
-            }
-          }
-          if (a.found && a.found.iconPath) {
-            var img = new Image();
-            (function (tile, src, idx) {
-              img.onload = function () { tile.innerHTML = ''; this.className = 'logo'; this.style.filter = 'url(#pinkify' + idx + ') drop-shadow(0 3px 6px rgba(190, 80, 135, 0.45))'; tile.appendChild(this); tile.className += ' has-logo'; };
-              img.src = src;
-            })(tiles[i], a.found.iconPath, i);
-          }
-        }
-      }, function () {});
-    } catch (e) {}
+  // ---------- talking to the helper service (service.js) on the TV ----------
+  var SVC = 'http://127.0.0.1:8085';
+  function api(path, ok, fail) {
+    var x = new XMLHttpRequest();
+    x.open('GET', SVC + path);
+    x.timeout = 6000;
+    x.onload = function () { if (x.status === 200) { ok(x.responseText); } else if (fail) { fail(x.responseText || ('HTTP ' + x.status)); } };
+    x.onerror = x.ontimeout = function () { if (fail) fail('no-service'); };
+    x.send();
   }
 
-  function tryLaunch(ids, n, label) {
-    if (n >= ids.length) { toast(label + " doesn't seem to be installed on this TV."); return; }
-    tizen.application.launch(ids[n], function () {}, function () { tryLaunch(ids, n + 1, label); });
+  function showIcon(i) {
+    var a = APPS[i];
+    var img = new Image();
+    img.onload = function () {
+      var tile = tiles[i];
+      tile.innerHTML = '';
+      img.className = 'logo';
+      img.style.filter = 'url(#pinkify' + i + ') drop-shadow(0 3px 6px rgba(190, 80, 135, 0.45))';
+      tile.appendChild(img);
+      setFocus(focus);
+    };
+    img.src = SVC + '/icon?id=' + encodeURIComponent(a.found.id);
+  }
+
+  function matchApps(list) {
+    for (var i = 0; i < APPS.length; i++) {
+      var a = APPS[i];
+      for (var j = 0; j < list.length; j++) {
+        if (a.match.test(list[j].name || '')) { a.found = list[j]; break; }
+      }
+      if (!a.found) {
+        for (var j2 = 0; j2 < list.length; j2++) {
+          if (a.ids.indexOf(list[j2].id) !== -1 || a.ids.indexOf(String(list[j2].id).split('.')[0]) !== -1) { a.found = list[j2]; break; }
+        }
+      }
+      if (a.found && a.found.icon) showIcon(i);
+    }
+  }
+
+  // The helper takes a moment to start the first time, so retry a few times.
+  function resolveInstalled(tries) {
+    api('/apps', function (txt) {
+      try { matchApps(JSON.parse(txt)); } catch (e) {}
+    }, function () {
+      if (tries > 0) setTimeout(function () { resolveInstalled(tries - 1); }, 1500);
+    });
+  }
+
+  function tryLaunch(ids, n, label, lastErr) {
+    if (n >= ids.length) {
+      toast(lastErr === 'no-service'
+        ? "Couldn't reach the app launcher. Close Pink Home and open it again."
+        : label + " couldn't be opened. Is it installed on this TV?");
+      return;
+    }
+    api('/launch?id=' + encodeURIComponent(ids[n]), function () {}, function (err) { tryLaunch(ids, n + 1, label, err); });
   }
 
   function open(i) {
     var a = APPS[i];
     setLast(a.label);
     $('last').textContent = a.label;
-    if (!hasTizen) { toast('Preview mode: on the TV this opens ' + a.label + '.'); return; }
     var ids = [];
     if (a.found) ids.push(a.found.id);
     for (var k = 0; k < a.ids.length; k++) if (ids.indexOf(a.ids[k]) === -1) ids.push(a.ids[k]);
@@ -181,7 +206,7 @@
       case 39: setFocus(focus + 1); e.preventDefault(); break;   // right
       case 13: open(focus); e.preventDefault(); break;           // OK / Enter
       case 10009:                                                // Back
-        if (hasTizen) { try { tizen.application.getCurrentApplication().exit(); } catch (x) {} }
+        try { tizen.application.getCurrentApplication().exit(); } catch (x) {}
         break;
       default:
         if (e.keyCode >= 49 && e.keyCode <= 54) { setFocus(e.keyCode - 49); open(focus); } // number keys 1-6
@@ -189,5 +214,5 @@
   });
 
   build();
-  resolveInstalled();
+  resolveInstalled(8);
 })();
