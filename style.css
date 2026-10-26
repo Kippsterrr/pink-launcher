@@ -1,0 +1,80 @@
+/* Pink Home — pastel pink. Sized for a 1920x1080 TV viewport; kept to features Tizen 6 (Chromium ~76) supports. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --pink: #f7a8c8;
+  --pink-soft: #ffd3e4;
+  --rose: #d97aa3;
+  --ink: #5b2a43;
+  --muted: rgba(91, 42, 67, 0.62);
+  --glass: rgba(255, 255, 255, 0.38);
+  --glass-edge: rgba(255, 255, 255, 0.75);
+}
+
+html, body {
+  width: 1920px; height: 1080px; overflow: hidden;
+  background: #fbe3ec;
+  color: var(--ink);
+  font-family: "SamsungOne", "Samsung Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* soft moving pastel glow behind everything */
+.bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden;
+  background: linear-gradient(160deg, #fde9f1 0%, #f9d4e3 55%, #f3cfe6 100%); }
+.blob { position: absolute; border-radius: 50%; filter: blur(110px); }
+.b1 { width: 900px; height: 900px; left: -220px; top: -320px; background: #ffb8d4; opacity: 0.8; animation: drift 26s ease-in-out infinite alternate; }
+.b2 { width: 800px; height: 800px; right: -260px; top: 100px; background: #e6c6f5; opacity: 0.7; animation: drift 32s ease-in-out infinite alternate-reverse; }
+.b3 { width: 760px; height: 760px; left: 620px; bottom: -440px; background: #ffc9de; opacity: 0.85; animation: drift 22s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: translate(0, 0); } to { transform: translate(120px, 80px); } }
+
+.screen { position: relative; z-index: 1; padding: 70px 110px 0; height: 1080px; }
+
+.top { display: flex; justify-content: space-between; align-items: flex-end; }
+.hello { font-size: 64px; font-weight: 700; letter-spacing: -1px; }
+.sub { font-size: 30px; color: var(--muted); margin-top: 8px; }
+.clock { text-align: right; }
+.time { font-size: 96px; font-weight: 300; letter-spacing: -2px; line-height: 1; color: #7a3557;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.9); }
+.date { font-size: 28px; color: var(--muted); margin-top: 10px; }
+
+/* frosted glass panel of cards */
+.panel { display: flex; margin-top: 56px; padding: 28px; border-radius: 44px;
+  background: var(--glass); border: 2px solid var(--glass-edge);
+  -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px);
+  box-shadow: 0 30px 70px rgba(214, 120, 163, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9); }
+.card { flex: 1; margin-left: 24px; padding: 34px 38px; border-radius: 30px; min-height: 280px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.9); display: flex; flex-direction: column; }
+.card:first-child { margin-left: 0; }
+.card-big { flex: 1.6; background: linear-gradient(140deg, #ffc2da, #f6d6ee); }
+.eyebrow { font-size: 22px; text-transform: uppercase; letter-spacing: 4px; color: var(--rose); }
+.big-title { font-size: 58px; font-weight: 700; margin-top: auto; line-height: 1.05; }
+.big-title.small { font-size: 46px; }
+.muted { font-size: 24px; color: var(--muted); margin-top: 12px; }
+.weather { margin-top: auto; display: flex; align-items: baseline; }
+.temp { font-size: 84px; font-weight: 300; white-space: nowrap; }
+.wdesc { font-size: 28px; margin-left: 20px; color: var(--ink); }
+
+.pill { margin: 46px auto 0; width: 360px; text-align: center; font-size: 26px; padding: 12px 0;
+  border-radius: 999px; background: rgba(255, 255, 255, 0.6); border: 1px solid #fff;
+  color: var(--ink); box-shadow: 0 8px 24px rgba(214, 120, 163, 0.2); }
+
+/* the dock: pink tiles, logos repainted in the same frosted white-pink as the top cards */
+.dock { display: flex; justify-content: center; margin-top: 34px; }
+.tile { width: 190px; height: 190px; margin: 0 20px; border-radius: 48px; position: relative;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: linear-gradient(160deg, #f9bcd5, #ee93ba);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 16px 36px rgba(200, 110, 155, 0.3);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; }
+.tile img.logo { width: 150px; height: 150px; object-fit: contain; }
+.tile .mono { font-size: 44px; font-weight: 800; letter-spacing: -1px; color: #fdf0f5; text-shadow: 0 3px 6px rgba(190, 80, 135, 0.45); text-align: center; line-height: 1; padding: 0 10px; }
+.tile.focus { transform: translateY(-18px) scale(1.14); border-color: #fff;
+  box-shadow: 0 0 0 8px rgba(247, 168, 200, 0.55), 0 0 60px rgba(255, 170, 210, 0.95), 0 26px 50px rgba(120, 40, 80, 0.4); }
+
+.hint { position: absolute; left: 0; right: 0; bottom: 46px; text-align: center; font-size: 22px; color: rgba(91, 42, 67, 0.45); }
+
+.toast { position: fixed; left: 50%; top: 60px; width: 900px; margin-left: -450px; text-align: center;
+  padding: 22px 30px; border-radius: 24px; font-size: 28px; background: rgba(255, 255, 255, 0.95); color: var(--ink);
+  border: 2px solid var(--pink); opacity: 0; transition: opacity 0.3s; z-index: 5; }
+.toast.show { opacity: 1; }

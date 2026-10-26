@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Pink Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <main class="screen">
+    <header class="top">
+      <div class="greet">
+        <div class="hello" id="hello">Hello</div>
+        <div class="sub">What are we watching?</div>
+      </div>
+      <div class="clock">
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date"></div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="card card-big">
+        <div class="eyebrow">Tonight</div>
+        <div class="big-title" id="tonight">Settle in.</div>
+        <div class="muted" id="tonightSub">Pick something below.</div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Bristol</div>
+        <div class="weather">
+          <div class="temp" id="temp">--&deg;</div>
+          <div class="wdesc" id="wdesc">Loading weather</div>
+        </div>
+        <div class="muted" id="whilo"></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Last opened</div>
+        <div class="big-title small" id="last">Nothing yet</div>
+        <div class="muted">Press OK on any app to launch it</div>
+      </div>
+    </section>
+
+    <div class="pill" id="pill">Netflix</div>
+
+    <nav class="dock" id="dock"></nav>
+
+    <div class="hint">&#9664; &#9654; to move &nbsp;&middot;&nbsp; OK to open &nbsp;&middot;&nbsp; Back to exit</div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
